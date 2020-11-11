@@ -1,50 +1,47 @@
 import { useCallback } from 'react';
-import { CanvasService } from './useCanvasService';
-import { Point } from '../../shared/types';
 
-type UseCanvasEventListenersArgs = {
-  canvasService: CanvasService;
-  canvasElement: HTMLCanvasElement | null;
+export type UseCanvasEventHandlersArgs = {
+  canvasHandlers: Partial<CanvasEventHandlers>;
 };
 
-type EventHandlerFunction = (
+export type EventHandler = (
   event: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
 ) => void;
 
-type UseCanvasEventListenersResult = {
-  onMouseDown: EventHandlerFunction;
-  onMouseUp: EventHandlerFunction;
-  onMouseMove: EventHandlerFunction;
+export type CanvasEventHandlers = {
+  onMouseDown: EventHandler;
+  onMouseUp: EventHandler;
+  onMouseMove: EventHandler;
 };
 
-function getCursorPosition(
-  canvasElement: HTMLCanvasElement,
-  event: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
-): Point {
-  const rect = canvasElement.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  return {
-    x,
-    y,
-  };
-}
-
-const useCanvasEventListeners = ({
-  canvasService,
-  canvasElement,
-}: UseCanvasEventListenersArgs): UseCanvasEventListenersResult => {
-  const onMouseDown: EventHandlerFunction = useCallback(() => {}, []);
-  const onMouseMove: EventHandlerFunction = useCallback(
+const useCanvasEventHandlers = ({
+  canvasHandlers,
+}: UseCanvasEventHandlersArgs): CanvasEventHandlers => {
+  const onMouseDown: EventHandler = useCallback(
     (event) => {
-      if (canvasElement) {
-        canvasService.addPoint(getCursorPosition(canvasElement, event));
+      if (canvasHandlers.onMouseDown) {
+        canvasHandlers.onMouseDown(event);
       }
     },
-    [canvasService, canvasElement],
+    [canvasHandlers],
+  );
+  const onMouseMove: EventHandler = useCallback(
+    (event) => {
+      if (canvasHandlers.onMouseMove) {
+        canvasHandlers.onMouseMove(event);
+      }
+    },
+    [canvasHandlers],
   );
 
-  const onMouseUp: EventHandlerFunction = useCallback(() => {}, []);
+  const onMouseUp: EventHandler = useCallback(
+    (event) => {
+      if (canvasHandlers.onMouseUp) {
+        canvasHandlers.onMouseUp(event);
+      }
+    },
+    [canvasHandlers],
+  );
 
   return {
     onMouseDown,
@@ -53,4 +50,4 @@ const useCanvasEventListeners = ({
   };
 };
 
-export default useCanvasEventListeners;
+export default useCanvasEventHandlers;

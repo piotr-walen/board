@@ -62,7 +62,7 @@ const useCanvasRenderer = ({
   );
 
   const canvasServiceSubscription = useCallback(() => {
-    canvasService.subscribeForPoints({
+    canvasService.subscribeForPath({
       next: draw,
     });
   }, [canvasService, draw]);

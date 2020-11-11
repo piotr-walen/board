@@ -2,8 +2,8 @@ import React from 'react';
 import useCanvasRenderer from './useCanvasRenderer';
 import useCanvasEventHandlers from './useCanvasEventHandlers';
 import { CanvasConfig } from '../../config/canvasConfig';
-import CanvasService from './useCanvasService';
 import useCanvasService from './useCanvasService';
+import useCanvasModes from './useCanvasModes';
 
 type CanvasProps = {
   canvasConfig: CanvasConfig;
@@ -14,9 +14,12 @@ const Canvas: React.FC<CanvasProps> = ({ canvasConfig }) => {
 
   const canvasService = useCanvasService();
   const { canvasRef } = useCanvasRenderer({ canvasConfig, canvasService });
-  const { onMouseDown, onMouseUp, onMouseMove } = useCanvasEventHandlers({
+  const { canvasHandlers } = useCanvasModes({
     canvasService,
     canvasElement: canvasRef.current,
+  });
+  const { onMouseDown, onMouseUp, onMouseMove } = useCanvasEventHandlers({
+    canvasHandlers,
   });
 
   return (
