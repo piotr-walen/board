@@ -1,5 +1,6 @@
-import { Point } from '../../../shared/types';
 import { CanvasMode } from '../useCanvasModes';
+import CreatablePath from '../../../shared/MutablePath';
+import { Point } from '../../../shared/Point';
 
 function getCursorPosition(
   canvasElement: HTMLCanvasElement,
@@ -15,29 +16,29 @@ function getCursorPosition(
 }
 
 class FreeDrawingState {
-  points: Point[] = [];
-  drawStarted: boolean = false;
+  path: CreatablePath | null = null;
 }
 
 const freeDrawing: CanvasMode = ({ canvasService, canvasElement }) => {
   const state = new FreeDrawingState();
   return {
     onMouseDown: (event) => {
+      state.path = canvasService.createPath();
       const point = getCursorPosition(canvasElement, event);
-      state.points = [point];
-      state.drawStarted = true;
+      state.path.addPoint(point);
     },
     onMouseMove: (event) => {
-      console.log(state.drawStarted);
-      if (state.drawStarted) {
-        const point = getCursorPosition(canvasElement, event);
-        canvasService.commitPath([...state.points, point]);
-        state.points = [point];
+      const point = getCursorPosition(canvasElement, event);
+      if (state.path) {
+        state.path.addPoint(point);
       }
     },
-    onMouseUp: () => {
-      state.points = [];
-      state.drawStarted = false;
+    onMouseUp: (event) => {
+      const point = getCursorPosition(canvasElement, event);
+      if (state.path) {
+        state.path.addPoint(point);
+        state.path.commit();
+      }
     },
   };
 };

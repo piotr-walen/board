@@ -1,6 +1,6 @@
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 
-function initializeFirebase(): void {
+function initializeFirebase() {
   const firebaseConfig = {
     apiKey: 'AIzaSyAUmxnSaesV8QddfsKO_DjGlh8amtPFiQc',
     authDomain: 'board-dbc21.firebaseapp.com',
@@ -10,7 +10,8 @@ function initializeFirebase(): void {
     messagingSenderId: '1044659056526',
     appId: '1:1044659056526:web:4fc21eff793638648dfedf',
   };
-  firebase.initializeApp(firebaseConfig);
+  const app = firebase.initializeApp(firebaseConfig);
+  app.database();
 }
 
 export default initializeFirebase;

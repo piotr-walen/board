@@ -4,7 +4,7 @@ import { CanvasEventHandlers } from './useCanvasEventHandlers';
 import freeDrawing from './modes/freeDrawing';
 
 export enum CanvasModeName {
-  FreeDrawing,
+  FreeDrawing = 'FreeDrawing',
 }
 
 type CanvasModeArgs = {

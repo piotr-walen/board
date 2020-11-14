@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 import { CanvasConfig } from '../../config/canvasConfig';
-import { Point } from '../../shared/types';
+import { Point } from '../../shared/Point';
 import { CanvasService } from './useCanvasService';
 
 export type DrawFunction = (points: Point[]) => void;
@@ -62,7 +62,7 @@ const useCanvasRenderer = ({
   );
 
   const canvasServiceSubscription = useCallback(() => {
-    canvasService.subscribeForPath({
+    canvasService.subscribeForPoints({
       next: draw,
     });
   }, [canvasService, draw]);
