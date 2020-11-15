@@ -1,11 +1,12 @@
-import React, { useRef, useEffect, useState } from 'react';
-import useCanvasRenderer from './useCanvasRenderer';
-import useCanvasEventHandlers from './useCanvasEventHandlers';
+import { flatten, map, values } from 'lodash';
+import React, { useMemo } from 'react';
+import Konva from 'react-konva';
 import { CanvasConfig } from '../../config/canvasConfig';
-import useCanvasService from './useCanvasService';
+import useCanvasEventHandlers from './useCanvasEventHandlers';
+import useCanvasManager from './useCanvasManager';
 import useCanvasModes from './useCanvasModes';
-import { useDatabaseServiceValue } from '../../services/DatabaseService';
-import PathService from '../../services/PathService';
+import useCanvasState from './useCanvasState';
+import './Canvas.css';
 
 type CanvasProps = {
   canvasConfig: CanvasConfig;
@@ -13,38 +14,57 @@ type CanvasProps = {
 
 const Canvas: React.FC<CanvasProps> = ({ canvasConfig }) => {
   const { height, width } = canvasConfig;
+  const stroke = 'blue';
+  const strokeWidth = 2;
 
-  console.log('service');
-  const [service] = useState(() => new PathService());
+  const [state, dispatch] = useCanvasState();
 
-  const { values: paths, save: savePath } = useDatabaseServiceValue({
-    initialValue: [],
-    service: service,
-  });
+  const canvasManager = useCanvasManager({ dispatch });
 
-  const canvasService = useCanvasService({
-    paths,
-    savePath,
-  });
-
-  const { canvasRef } = useCanvasRenderer({ canvasConfig, canvasService });
   const { canvasHandlers } = useCanvasModes({
-    canvasService,
-    canvasElement: canvasRef.current,
+    canvasManager,
+    canvasModeName: state.modeName,
   });
-  const { onMouseDown, onMouseUp, onMouseMove } = useCanvasEventHandlers({
+
+  const {
+    onMouseDown,
+    onMouseMove,
+    onMouseUp,
+    onMouseOut,
+  } = useCanvasEventHandlers({
     canvasHandlers,
   });
 
+  const lines = useMemo(
+    () =>
+      map(values(state.linesDictionary), ({ points, id }) => ({
+        id,
+        points: flatten(map(points, ({ x, y }) => [x, y])),
+      })),
+    [state.linesDictionary],
+  );
+
   return (
-    <canvas
-      ref={canvasRef}
-      height={height}
+    <Konva.Stage
       width={width}
+      height={height}
       onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
       onMouseMove={onMouseMove}
-    />
+      onMouseUp={onMouseUp}
+      onMouseOut={onMouseOut}
+    >
+      <Konva.Layer>
+        {map(lines, ({ points, id }) => (
+          <Konva.Line
+            points={points}
+            key={id}
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            listening={false}
+          />
+        ))}
+      </Konva.Layer>
+    </Konva.Stage>
   );
 };
 

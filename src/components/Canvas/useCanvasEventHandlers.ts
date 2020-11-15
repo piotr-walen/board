@@ -1,17 +1,17 @@
 import { useCallback } from 'react';
+import { KonvaEventObject } from 'konva/types/Node';
 
 export type UseCanvasEventHandlersArgs = {
   canvasHandlers: Partial<CanvasEventHandlers>;
 };
 
-export type EventHandler = (
-  event: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
-) => void;
+export type EventHandler = (event: KonvaEventObject<MouseEvent>) => void;
 
 export type CanvasEventHandlers = {
   onMouseDown: EventHandler;
   onMouseUp: EventHandler;
   onMouseMove: EventHandler;
+  onMouseOut: EventHandler;
 };
 
 const useCanvasEventHandlers = ({
@@ -43,10 +43,20 @@ const useCanvasEventHandlers = ({
     [canvasHandlers],
   );
 
+  const onMouseOut: EventHandler = useCallback(
+    (event) => {
+      if (canvasHandlers.onMouseOut) {
+        canvasHandlers.onMouseOut(event);
+      }
+    },
+    [canvasHandlers],
+  );
+
   return {
     onMouseDown,
     onMouseMove,
     onMouseUp,
+    onMouseOut,
   };
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Canvas from '../Canvas/Canvas';
 import { CanvasConfig } from '../../config/canvasConfig';

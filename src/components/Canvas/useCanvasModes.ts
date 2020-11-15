@@ -1,38 +1,31 @@
-import { useState, useMemo } from 'react';
-import { CanvasService } from './useCanvasService';
+import { useMemo } from 'react';
 import { CanvasEventHandlers } from './useCanvasEventHandlers';
 import freeDrawing from './modes/freeDrawing';
+import { CanvasManager } from './useCanvasManager';
 
 export enum CanvasModeName {
   FreeDrawing = 'FreeDrawing',
 }
 
 type CanvasModeArgs = {
-  canvasService: CanvasService;
-  canvasElement: HTMLCanvasElement;
+  canvasManager: CanvasManager;
 };
 
 export type CanvasMode = (args: CanvasModeArgs) => Partial<CanvasEventHandlers>;
 
 type GetHandlersForModeNameArgs = {
-  canvasService: CanvasService;
-  canvasElement: HTMLCanvasElement | null;
+  canvasManager: CanvasManager;
   canvasModeName: CanvasModeName;
 };
 
 const getHandlersForModeName = ({
-  canvasService,
-  canvasElement,
+  canvasManager,
   canvasModeName,
 }: GetHandlersForModeNameArgs): Partial<CanvasEventHandlers> => {
-  if (!canvasElement) {
-    return {};
-  }
   switch (canvasModeName) {
     case CanvasModeName.FreeDrawing:
       return freeDrawing({
-        canvasService,
-        canvasElement,
+        canvasManager,
       });
     default:
       return {};
@@ -40,30 +33,24 @@ const getHandlersForModeName = ({
 };
 
 type UseCanvasModesArgs = {
-  canvasService: CanvasService;
-  canvasElement: HTMLCanvasElement | null;
+  canvasManager: CanvasManager;
+  canvasModeName: CanvasModeName;
 };
 
 const useCanvasModes = ({
-  canvasService,
-  canvasElement,
+  canvasModeName,
+  canvasManager,
 }: UseCanvasModesArgs) => {
-  const [canvasModeName, setCanvasModeName] = useState(
-    CanvasModeName.FreeDrawing,
-  );
-
   const canvasHandlers = useMemo(
     () =>
       getHandlersForModeName({
-        canvasService,
-        canvasElement,
         canvasModeName,
+        canvasManager,
       }),
-    [canvasService, canvasElement, canvasModeName],
+    [canvasManager, canvasModeName],
   );
 
   return {
-    setCanvasModeName,
     canvasHandlers,
   };
 };

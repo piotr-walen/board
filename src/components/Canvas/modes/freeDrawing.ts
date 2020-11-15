@@ -1,44 +1,47 @@
 import { CanvasMode } from '../useCanvasModes';
-import CreatablePath from '../../../shared/MutablePath';
 import { Point } from '../../../shared/Point';
-
-function getCursorPosition(
-  canvasElement: HTMLCanvasElement,
-  event: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
-): Point {
-  const rect = canvasElement.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  return {
-    x,
-    y,
-  };
-}
+import { useState } from 'react';
+import { Line } from '../../../shared/Line';
+import { KonvaEventObject } from 'konva/types/Node';
 
 class FreeDrawingState {
-  path: CreatablePath | null = null;
+  line = new Line();
+  hasStarted = false;
 }
 
-const freeDrawing: CanvasMode = ({ canvasService, canvasElement }) => {
+const getPointFromEvent = (event: KonvaEventObject<MouseEvent>): Point => ({
+  x: event.evt.x,
+  y: event.evt.y,
+});
+
+const freeDrawing: CanvasMode = ({ canvasManager }) => {
   const state = new FreeDrawingState();
   return {
     onMouseDown: (event) => {
-      state.path = canvasService.createPath();
-      const point = getCursorPosition(canvasElement, event);
-      state.path.addPoint(point);
+      state.hasStarted = true;
+      state.line = new Line();
+      state.line.points = [getPointFromEvent(event)];
+      canvasManager.drawLine(state.line);
     },
     onMouseMove: (event) => {
-      const point = getCursorPosition(canvasElement, event);
-      if (state.path) {
-        state.path.addPoint(point);
+      if (state.hasStarted) {
+        state.line.points = [...state.line.points, getPointFromEvent(event)];
+        canvasManager.drawLine(state.line);
       }
     },
     onMouseUp: (event) => {
-      const point = getCursorPosition(canvasElement, event);
-      if (state.path) {
-        state.path.addPoint(point);
-        state.path.commit();
+      if (state.hasStarted) {
+        state.line.points = [...state.line.points, getPointFromEvent(event)];
+        canvasManager.commitLine(state.line);
       }
+      state.hasStarted = false;
+    },
+    onMouseOut: (event) => {
+      if (state.hasStarted) {
+        state.line.points = [...state.line.points, getPointFromEvent(event)];
+        canvasManager.commitLine(state.line);
+      }
+      state.hasStarted = false;
     },
   };
 };
